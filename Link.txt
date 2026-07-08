@@ -1,0 +1,9 @@
+# Projeyi klonla
+git clone https://github.com/shzxrp/ZxCDDoS
+cd ZxCDDoS
+
+# Node.js paketlerini yükle
+npm i requests https-proxy-agent crypto-random-string events fs net cloudscraper request hcaptcha-solver randomstring cluster cloudflare-bypasser
+
+# Python bağımlılıklarını yükle
+pip install -r requirements.txt
