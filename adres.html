@@ -1,0 +1,536 @@
+<!DOCTYPE html>
+<html lang="tr">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+    <title>ADRES SORGULAMA TERMINAL</title>
+
+    <link href="https://fonts.googleapis.com/css2?family=VT323&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@4.3.0/fonts/remixicon.css" rel="stylesheet">
+
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"
+        integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
+
+    <style>
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+
+    :root {
+        --font-base: clamp(1.05rem, 3.8vw + 0.4rem, 1.45rem);
+        --font-label: clamp(1.1rem, 4vw + 0.3rem, 1.4rem);
+        --font-small: clamp(0.95rem, 3.2vw + 0.3rem, 1.25rem);
+        --spacing-sm: clamp(0.8rem, 4vw, 1.2rem);
+        --spacing-md: clamp(1.2rem, 5vw, 1.8rem);
+    }
+
+    body {
+        font-family: 'VT323', monospace;
+        background: #00060f;
+        color: #00f0ff;
+        min-height: 100vh;
+        padding: var(--spacing-sm);
+        line-height: 1.4;
+        font-size: var(--font-base);
+    }
+
+    .scanline {
+        position: fixed;
+        inset: 0;
+        pointer-events: none;
+        background: repeating-linear-gradient(to bottom, transparent 0, rgba(0, 240, 255, 0.04) 1px, transparent 3px);
+        animation: scan 14s linear infinite;
+        opacity: 0.6;
+        z-index: -1;
+    }
+
+    @keyframes scan {
+        0% {
+            transform: translateY(-120%);
+        }
+
+        100% {
+            transform: translateY(220%);
+        }
+    }
+
+    .container {
+        max-width: 800px;
+        margin: 0 auto;
+        width: 100%;
+    }
+
+    .back-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.6rem;
+        color: #00e0ff;
+        text-decoration: none;
+        font-size: clamp(1.1rem, 4vw, 1.35rem);
+        padding: 0.6rem 1.1rem;
+        border: 1px solid #00f0ff40;
+        background: rgba(0, 20, 40, 0.4);
+        margin: 1rem 0 1.8rem;
+        transition: all 0.2s;
+        touch-action: manipulation;
+    }
+
+    .back-btn:hover,
+    .back-btn:active {
+        background: rgba(0, 40, 80, 0.6);
+        box-shadow: 0 0 16px #00f0ff50;
+    }
+
+    .terminal-panel {
+        background: rgba(0, 10, 20, 0.85);
+        border: 1px solid #00f0ff30;
+        box-shadow: 0 0 30px rgba(0, 240, 255, 0.15);
+        margin-bottom: 2rem;
+        overflow: hidden;
+        border-radius: 4px;
+    }
+
+    .panel-header {
+        background: #001428;
+        border-bottom: 1px solid #00f0ff40;
+        padding: clamp(0.8rem, 3vw, 1rem) clamp(1rem, 4vw, 1.3rem);
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 0.8rem;
+        font-size: clamp(1.2rem, 4.5vw, 1.45rem);
+    }
+
+    .header-title {
+        display: flex;
+        align-items: center;
+        gap: 0.7rem;
+        flex: 1;
+    }
+
+    .demo-badge {
+        background: rgba(255, 0, 170, 0.25);
+        color: #ff44cc;
+        border: 1px solid #ff00aa60;
+        padding: 0.3rem 0.8rem;
+        font-size: clamp(0.9rem, 3.5vw, 1rem);
+        border-radius: 3px;
+    }
+
+    .form-content {
+        padding: var(--spacing-md);
+    }
+
+    .field {
+        margin-bottom: 1.5rem;
+    }
+
+    .field label {
+        display: block;
+        color: #88ffff;
+        font-size: var(--font-label);
+        margin-bottom: 0.5rem;
+    }
+
+    input {
+        width: 100%;
+        background: #00060f;
+        border: 1px solid #00f0ff50;
+        color: #00f0ff;
+        font-size: var(--font-base);
+        padding: 0.8rem 1rem;
+        font-family: inherit;
+        border-radius: 3px;
+    }
+
+    input:focus {
+        outline: none;
+        border-color: #00f0ff;
+        box-shadow: 0 0 14px rgba(0, 240, 255, 0.5);
+        background: #00111a;
+    }
+
+    .buttons {
+        display: flex;
+        flex-direction: row;
+        gap: 1rem;
+        flex-wrap: wrap;
+        margin-top: 1.2rem;
+    }
+
+    .btn {
+        flex: 1;
+        min-width: 140px;
+        background: transparent;
+        border: 2px solid;
+        font-size: clamp(1.15rem, 4.2vw, 1.35rem);
+        padding: 0.8rem 1rem;
+        cursor: pointer;
+        transition: all 0.18s;
+        text-align: center;
+        letter-spacing: 1.2px;
+        border-radius: 4px;
+        touch-action: manipulation;
+    }
+
+    .btn-search {
+        border-color: #00d0ff;
+        color: #00e0ff;
+        box-shadow: 0 0 12px rgba(0, 208, 255, 0.4);
+    }
+
+    .btn-search:hover,
+    .btn-search:active {
+        background: rgba(0, 208, 255, 0.18);
+        box-shadow: 0 0 24px rgba(0, 208, 255, 0.7);
+    }
+
+    .btn-clear {
+        border-color: #ff33aa;
+        color: #ff66cc;
+        box-shadow: 0 0 10px rgba(255, 51, 170, 0.4);
+    }
+
+    .btn-clear:hover,
+    .btn-clear:active {
+        background: rgba(255, 51, 170, 0.18);
+        box-shadow: 0 0 22px rgba(255, 51, 170, 0.7);
+    }
+
+    .output-content {
+        min-height: 140px;
+        padding: var(--spacing-md);
+        color: #bbffff;
+        font-size: var(--font-base);
+        line-height: 1.5;
+        white-space: pre-wrap;
+        word-break: break-word;
+    }
+
+    .placeholder-text {
+        color: #557799;
+        text-align: center;
+        padding: 2rem 1rem;
+        font-size: var(--font-small);
+    }
+
+    .error-text {
+        color: #ff6666;
+        line-height: 1.5;
+    }
+
+    /* ────────────────────────────────────────────── */
+    /* MOBILE / SMALL SCREEN OPTIMIZATIONS          */
+    /* ────────────────────────────────────────────── */
+
+    @media (max-width: 640px) {
+        body {
+            padding: 0.8rem;
+        }
+
+        .container {
+            padding: 0 0.4rem;
+        }
+
+        .back-btn {
+            font-size: clamp(1rem, 4.5vw, 1.2rem);
+            padding: 0.5rem 1rem;
+            width: 100%;
+            justify-content: center;
+            margin: 0.8rem 0 1.5rem;
+        }
+
+        .panel-header {
+            font-size: clamp(1.1rem, 5vw, 1.3rem);
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 0.5rem;
+            padding: 0.8rem 1rem;
+        }
+
+        .demo-badge {
+            align-self: flex-start;
+        }
+
+        .form-content {
+            padding: 1.2rem 1rem;
+        }
+
+        .buttons {
+            flex-direction: column;
+            gap: 0.8rem;
+        }
+
+        .btn {
+            min-width: unset;
+            width: 100%;
+            padding: 0.9rem;
+            font-size: clamp(1.1rem, 5vw, 1.3rem);
+        }
+
+        .output-content {
+            font-size: clamp(1.05rem, 4.2vw, 1.25rem);
+            padding: 1.2rem 1rem;
+        }
+
+        .field label {
+            font-size: clamp(1rem, 4.5vw, 1.25rem);
+        }
+
+        input {
+            font-size: clamp(1.1rem, 5vw, 1.3rem);
+            padding: 0.7rem 0.9rem;
+        }
+    }
+
+    @media (max-width: 380px) {
+        .panel-header {
+            font-size: 1.15rem;
+        }
+
+        .output-content {
+            font-size: 1.1rem;
+        }
+    }
+    </style>
+    <style>
+    /* SONUÇ TABLOSU - BELİRGİN ARKA PLANLI VERSİYON */
+    .result-table {
+        width: 100%;
+        border-collapse: separate;
+        border-spacing: 0 0.4rem;
+        /* satırlar arası boşluk */
+        font-size: clamp(1.1rem, 3.5vw, 1.35rem);
+        margin: 0.5rem 0;
+    }
+
+    .result-table tr {
+        background: rgba(0, 25, 45, 0.75);
+        /* koyu mavi-siyah arka plan */
+        border: 1px solid #00f0ff25;
+        border-radius: 4px;
+        box-shadow: 0 2px 8px rgba(0, 240, 255, 0.08);
+        transition: all 0.18s ease;
+    }
+
+    .result-table tr:hover {
+        background: rgba(0, 45, 70, 0.9);
+        /* hover'da daha parlak */
+        box-shadow: 0 4px 16px rgba(0, 240, 255, 0.25);
+        transform: translateY(-1px);
+    }
+
+    .result-table td {
+        padding: 0.75rem 1rem;
+        vertical-align: middle;
+    }
+
+    .result-table .label {
+        width: 38%;
+        color: #88ffff;
+        font-weight: bold;
+        text-align: right;
+        padding-right: 1.2rem;
+        background: rgba(0, 20, 40, 0.4);
+        /* etiket sütunu biraz daha koyu */
+        border-right: 1px solid #00f0ff30;
+        border-top-left-radius: 4px;
+        border-bottom-left-radius: 4px;
+    }
+
+    .result-table .value {
+        width: 62%;
+        color: #e0ffff;
+        word-break: break-word;
+        border-top-right-radius: 4px;
+        border-bottom-right-radius: 4px;
+    }
+
+    /* Mobil ayarları */
+    @media (max-width: 580px) {
+        .result-table {
+            border-spacing: 0 0.3rem;
+            font-size: clamp(1rem, 3.4vw, 1.25rem);
+        }
+
+        .result-table td {
+            padding: 0.6rem 0.9rem;
+        }
+
+        .result-table .label {
+            width: 45%;
+            text-align: left;
+            padding-right: 0.8rem;
+            border-right: none;
+            border-bottom: 1px solid #00f0ff20;
+            border-radius: 4px 4px 0 0;
+        }
+
+        .result-table .value {
+            width: 100%;
+            display: block;
+            border-radius: 0 0 4px 4px;
+        }
+
+        /* Küçük ekranda satırları alt alta yapma alternatifi */
+        .result-table tr {
+            display: block;
+            margin-bottom: 0.8rem;
+        }
+
+        .result-table tr:hover {
+            transform: none;
+        }
+    }
+    </style>
+</head>
+
+<body>
+    <div class="scanline"></div>
+
+    <div class="container">
+        <a href="index.php" class="back-btn">
+            <i class="ri-arrow-left-s-line"></i>
+            ANASAYFAYA DÖN
+        </a>
+
+        <div class="terminal-panel">
+            <div class="panel-header">
+                <div class="header-title">
+                    <i class="ri-user-search-line"></i>
+                    ADRES SORGULAMA TERMINALI
+                </div>
+                <span class="demo-badge">Güncel Hızlı veriler.</span>
+            </div>
+
+            <div class="form-content">
+                <div class="field">
+                    <label>TC Kimlik No</label>
+                    <input type="text" id="tc" placeholder="örn: 12345678901" maxlength="11" inputmode="numeric"
+                        pattern="\d*">
+                </div>
+
+                <!-- <div style="color:#ff9966; margin:1.2rem 0; font-size: clamp(1rem, 3.8vw, 1.2rem);">
+                    ⚠️ Bu sadece teknik test amaçlı bir demostur.<br>
+                    Başka kişilerin bilgilerini sorgulamak KVKK ve TCK'ya aykırıdır.
+                </div> -->
+
+                <div class="buttons">
+                    <button id="sorgula" class="btn btn-search">
+                        <i class="ri-search-line"></i> SORGULA
+                    </button>
+
+                </div>
+            </div>
+        </div>
+
+        <div class="terminal-panel">
+            <div class="panel-header">
+                <i class="ri-terminal-line"></i>
+                SORGULAMA ÇIKTISI
+            </div>
+            <div class="output-content" id="sonucAlani">
+                <div class="placeholder-text">
+                    HENÜZ SORGULAMA YAPILMADI<br>
+                    11 haneli TC kimlik numarası girip SORGULA'ya basın<br>
+                    (yalnızca lokal test / demo amaçlı)
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+    $(document).ready(function() {
+        $("#sorgula").click(function() {
+            let tc = $("#tc").val().trim();
+
+            if (tc.length !== 11 || !/^\d{11}$/.test(tc)) {
+                $("#sonucAlani").html('<span class="error-text">Geçerli 11 haneli TC giriniz!</span>');
+                return;
+            }
+
+            $("#sonucAlani").html('Sorgulanıyor...');
+
+            $.ajax({
+                url: "https://belsis.store/api/req/tc.php",
+                type: "GET",
+                headers: {
+                    "X-Requested-With": "XMLHttpRequest"
+                },
+                data: {
+                    tckn: tc
+                },
+                dataType: "json",
+                timeout: 15000,
+                timeout: 15000,
+                success: function(response) {
+                    if (response.success === false) {
+                        $("#sonucAlani").html('<span class="error-text">' + (response
+                            .message || 'Bilinmeyen hata') + '</span>');
+                        return;
+                    }
+
+                    if (!response.data) {
+                        $("#sonucAlani").html(
+                            '<span class="error-text">Veri bulunamadı</span>');
+                        return;
+                    }
+
+                    let d = response.data;
+                    let html = `
+    <table class="result-table">
+        <tr>
+            <td class="label">TC</td>
+            <td class="value">${d.TC || '-'}</td>
+        </tr>
+        <tr>
+            <td class="label">Ad Soyad</td>
+            <td class="value">${d.AD || '?'} ${d.SOYAD || '?'}</td>
+        </tr>
+        <tr>
+            <td class="label">Doğum Tarihi</td>
+            <td class="value">${d.DOGUMTARIHI || '-'}</td>
+        </tr>
+        <tr>
+            <td class="label">Adres</td>
+            <td class="value">${d.ADRES || 'Kayıtlı değil'}</td>
+        </tr>
+    </table>
+`;
+
+                    $("#sonucAlani").html(html);
+                },
+                error: function(xhr, status) {
+                    let msg = "Bağlantı hatası";
+                    if (xhr.responseJSON?.message) msg = xhr.responseJSON.message;
+                    else if (xhr.responseText) msg += "<br>" + xhr.responseText.substring(0,
+                        300);
+                    else msg += " (" + status + ")";
+                    $("#sonucAlani").html('<span class="error-text">' + msg + '</span>');
+                }
+            });
+        });
+
+        $("#sifirla").click(function() {
+            $("#tc").val("");
+            $("#sonucAlani").html(
+                '<div class="placeholder-text">HENÜZ SORGULAMA YAPILMADI...<br>11 haneli TC girip SORGULA\'ya basın</div>'
+                );
+        });
+
+        // Klavye enter desteği (mobil için faydalı)
+        $("#tc").on('keypress', function(e) {
+            if (e.which === 13) {
+                $("#sorgula").click();
+            }
+        });
+    });
+    </script>
+<script defer src="https://static.cloudflareinsights.com/beacon.min.js/v4513226cdae34746b4dedf0b4dfa099e1781791509496" integrity="sha512-ZE9pZaUXND66v380QUtch/5sE9tPFh2zg45pR2PB0CVkCtOREv2AJKkSidISWkysEuQ0EH8faUU5du78bx87UQ==" data-cf-beacon='{"version":"2024.11.0","token":"f3eb79a3bfbb421ebf3680c60fea86b2","r":1,"server_timing":{"name":{"cfCacheStatus":true,"cfEdge":true,"cfExtPri":true,"cfL4":true,"cfOrigin":true,"cfSpeedBrain":true},"location_startswith":null}}' crossorigin="anonymous"></script>
+</body>
+
+</html>
+
