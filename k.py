@@ -55,7 +55,6 @@ class ProxyManager:
         self.test_proxies()
     
     def load_proxies(self):
-        print(Fore.YELLOW + "[*] Proxy listesi yükleniyor..." + Fore.RESET)
         if os.path.exists('proxies.txt'):
             with open('proxies.txt', 'r') as f:
                 for line in f:
@@ -96,10 +95,9 @@ class ProxyManager:
             for _ in range(500):
                 self.proxies.append(f"{random.randint(1,255)}.{random.randint(1,255)}.{random.randint(1,255)}.{random.randint(1,255)}:{random.randint(1000,65535)}")
         
-        print(Fore.GREEN + f"[✓] {len(self.proxies)} proxy yüklendi" + Fore.RESET)
+
     
     def test_proxies(self):
-        print(Fore.YELLOW + "[*] Proxy'ler test ediliyor..." + Fore.RESET)
         def test_single(proxy):
             try:
                 ip, port = proxy.split(':')
@@ -130,7 +128,6 @@ class ProxyManager:
                 except:
                     pass
         
-        print(Fore.GREEN + f"[✓] {len(self.working)} çalışan proxy kullanılıyor" + Fore.RESET)
     
     def get_proxy(self):
         with self.lock:
